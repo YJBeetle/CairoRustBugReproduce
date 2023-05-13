@@ -21,15 +21,19 @@ fn paint(surface: &Surface) {
 }
 
 fn main() {
-    println!("create PNG");
-    let surface = ImageSurface::create(cairo::Format::ARgb32, 500, 500).unwrap();
-    paint(&surface);
-    let mut f = std::fs::File::create("out.png").unwrap();
-    surface.write_to_png(&mut f).unwrap();
+    {
+        println!("create PNG");
+        let surface = ImageSurface::create(cairo::Format::ARgb32, 500, 500).unwrap();
+        paint(&surface);
+        let mut f = std::fs::File::create("out.png").unwrap();
+        surface.write_to_png(&mut f).unwrap();
+    }
 
-    println!("create PDF");
-    let f = std::fs::File::create("out.pdf").unwrap();
-    let surface = PdfSurface::for_stream(500., 500., f).unwrap();
-    paint(&surface);
-    surface.finish();
+    {
+        println!("create PDF");
+        let f = std::fs::File::create("out.pdf").unwrap();
+        let surface = PdfSurface::for_stream(500., 500., f).unwrap();
+        paint(&surface);
+        surface.finish();
+    }
 }

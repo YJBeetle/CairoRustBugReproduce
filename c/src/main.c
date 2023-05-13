@@ -5,7 +5,10 @@
 cairo_status_t write_data(void *closure, const unsigned char *data, unsigned int length)
 {
     FILE *file = (FILE *)closure;
-    fwrite(data, 1, length, file);
+    if (fwrite(data, 1, length, file) != length) {
+      return CAIRO_STATUS_WRITE_ERROR;
+    }
+
     return CAIRO_STATUS_SUCCESS;
 }
 
@@ -28,6 +31,12 @@ void paint(cairo_surface_t *surface)
     cairo_fill(cr3);
     cairo_set_source_surface(cr, surface3, 200., 200.);
     cairo_paint(cr);
+
+    cairo_destroy(cr3);
+    cairo_surface_destroy(surface3);
+    cairo_destroy(cr2);
+    cairo_surface_destroy(surface2);
+    cairo_destroy(cr);
 }
 
 int main()
@@ -38,6 +47,8 @@ int main()
         paint(surface);
         FILE *file = fopen("out.png", "wb");
         cairo_surface_write_to_png_stream(surface, write_data, (void *)file);
+        fclose(file);
+        cairo_surface_destroy(surface);
     }
     {
         printf("create PDF\n");
@@ -45,5 +56,7 @@ int main()
         cairo_surface_t *surface = cairo_pdf_surface_create_for_stream(write_data, (void *)file, 500., 500.);
         paint(surface);
         cairo_surface_finish(surface);
+        fclose(file);
+        cairo_surface_destroy(surface);
     }
 }
